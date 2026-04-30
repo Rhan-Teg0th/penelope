@@ -2679,7 +2679,8 @@ class Session:
 				cmd = dedent(cmd)
 				if value:
 					buffer = io.BytesIO()
-				timeout = options.short_timeout if value else None
+				if timeout is False:
+					timeout = options.short_timeout if value else None
 
 				if not stdin_stream:
 					stdin_stream = self.new_streamID
