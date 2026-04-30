@@ -1,3 +1,5 @@
+> **Fork notice:** This is a fork of [brightio/penelope](https://github.com/brightio/penelope) with an MCP server layer (`penelope_mcp.py`) that exposes penelope's core as an [MCP](https://modelcontextprotocol.io/) tool server — letting Claude Code drive reverse shells, run post-exploitation modules, and manage sessions directly from the AI assistant.
+
 <div align="center">
   <img src="https://github.com/user-attachments/assets/0d369fba-480e-4e27-a117-8845dbd4b58e" alt="Logo" width="200"/>
 </div>
@@ -9,6 +11,60 @@
 ![MEA](https://img.shields.io/badge/MEA%202025-green)
 
 Penelope is a powerful shell handler built as a modern netcat replacement for RCE exploitation, aiming to simplify, accelerate, and optimize post-exploitation workflows.
+
+---
+
+## MCP Server (this fork)
+
+`penelope_mcp.py` wraps penelope's engine in an [MCP](https://modelcontextprotocol.io/) stdio server so Claude Code (or any MCP-capable client) can control it programmatically.
+
+### Install
+
+```bash
+# 1. Install penelope to /opt/penelope (path expected by the MCP server)
+git clone https://github.com/Rhan-Teg0th/penelope-mcp /opt/penelope
+
+# 2. Install MCP dependencies
+pip install mcp anyio
+
+# 3. Register with Claude Code (~/.claude/settings.json)
+```
+
+```json
+{
+  "mcpServers": {
+    "penelope": {
+      "command": "python3",
+      "args": ["/opt/penelope/penelope_mcp.py"]
+    }
+  }
+}
+```
+
+### Available tools
+
+| Tool | Description |
+|------|-------------|
+| `penelope_listen` | Start a TCP listener and get reverse-shell payloads |
+| `penelope_sessions` | List active sessions |
+| `penelope_wait_session` | Block until a new session connects |
+| `penelope_exec` | Run a shell command on a session and return output |
+| `penelope_send_raw` | Send raw bytes (passwords, Ctrl-C/D, REPL input) |
+| `penelope_upload` | Upload a local file to the target |
+| `penelope_download` | Download remote files into the loot directory |
+| `penelope_kill_session` | Close a session |
+| `penelope_kill_listener` | Stop a listener |
+| `penelope_deploy_agent` | Deploy penelope's persistent agent on a session |
+| `penelope_modules` | List built-in post-exploitation modules |
+| `penelope_run_module` | Run a module (linpeas, lse, chisel, traitor, etc.) |
+
+### Notes
+
+- All of penelope's stdout/stderr is redirected to `/tmp/penelope_mcp.log` to keep the MCP JSON-RPC stream clean.
+- The server runs headless (`--no-attach`) — no TTY interaction is needed.
+- Sessions and listeners persist across tool calls for the lifetime of the server process.
+
+---
 
 ## Table of Contents
 - 📥 [Install](#install)
